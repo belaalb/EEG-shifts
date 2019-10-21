@@ -21,7 +21,7 @@ def load_subject_session(sub = 2, session_type = 'task'):
 		runs = 1
 	elif session_type == 'baseline2':
 		event_id_annot = dict(T0=0)	
-		event_id_epochs = dict(open_=1)
+		event_id_epochs = dict(open_=0)
 		runs = 2		
 
 	raw_fnames = eegbci.load_data(subject, runs)
