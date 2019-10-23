@@ -28,8 +28,6 @@ def load_subject_session(sub = 2, session_type = 'task'):
 	raws = [read_raw_edf(f, preload=True) for f in raw_fnames]
 	raw = concatenate_raws(raws)
 
-	print(raw.n_times)
-
 	# strip channel names of "." characters
 	raw.rename_channels(lambda x: x.strip('.'))
 
@@ -53,7 +51,6 @@ def load_subject_session(sub = 2, session_type = 'task'):
 
 	#epochs_data = epochs_train.get_data()
 
-
 	psds, freqs = mne.time_frequency.psd_welch(epochs, fmin=0.5, fmax=30.)
 
 	# Normalize the PSDs
@@ -72,6 +69,7 @@ def load_subject_session(sub = 2, session_type = 'task'):
 		X.append(np.expand_dims(psds_band.reshape(len(psds), -1), axis=-1))
 
 	X = np.concatenate(X, axis=-1)
+	X = X.reshape(X.shape[0], X.shape[1]*X.shape[-1])
 	return X, labels
 	
 def build_feat_matrix(subs, session_type, n_valid_samples):
@@ -92,17 +90,17 @@ def build_feat_matrix(subs, session_type, n_valid_samples):
 			if idx not in train_samples_idx:
 				valid_samples_idx.append(idx)
 		
-		feat_dict_train[sub] = X[train_samples_idx]
-		label_dict_train[sub] = y[train_samples_idx]
-		feat_dict_valid[sub] = X[valid_samples_idx]
-		label_dict_valid[sub] = y[valid_samples_idx]
+		feat_dict_train[sub-1] = X[train_samples_idx]
+		label_dict_train[sub-1] = y[train_samples_idx]
+		feat_dict_valid[sub-1] = X[valid_samples_idx]
+		label_dict_valid[sub-1] = y[valid_samples_idx]
 	
 	return feat_dict_train, label_dict_train, feat_dict_valid, label_dict_valid	
 	
 if __name__ == '__main__':
-	X_, y_ = load_subject_session(2, 'baseline2')
+	X_, y_ = load_subject_session(2, 'task')
 	print(X_.shape)
 	print(y_.shape)
 	
-	feat_train, label_train, feat_valid, label_valid = build_feat_matrix([1,2], 'task', 30)
+	feat_train, label_train, feat_valid, label_valid = build_feat_matrix(range(1, 2+1), 'task', 30)
 	
