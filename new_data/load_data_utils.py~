@@ -41,6 +41,8 @@ def load_subject_session(sub = 2, session_type = 'task'):
 
 	picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False,
 		             exclude='bads')
+	picks = mne.pick_channels(raw.info["ch_names"], ["C3", "Cz", "C4"])
+
 
 	# Read epochs (train will be done only between 1 and 2s)
 	# Testing will be done with a running classifier
@@ -90,10 +92,10 @@ def build_feat_matrix(subs, session_type, n_valid_samples):
 			if idx not in train_samples_idx:
 				valid_samples_idx.append(idx)
 		
-		feat_dict_train[sub] = X[train_samples_idx]
-		label_dict_train[sub] = y[train_samples_idx]
-		feat_dict_valid[sub] = X[valid_samples_idx]
-		label_dict_valid[sub] = y[valid_samples_idx]
+		feat_dict_train[sub-1] = X[train_samples_idx]
+		label_dict_train[sub-1] = y[train_samples_idx]
+		feat_dict_valid[sub-1] = X[valid_samples_idx]
+		label_dict_valid[sub-1] = y[valid_samples_idx]
 	
 	return feat_dict_train, label_dict_train, feat_dict_valid, label_dict_valid	
 	

@@ -41,6 +41,8 @@ def load_subject_session(sub = 2, session_type = 'task'):
 
 	picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False,
 		             exclude='bads')
+	picks = mne.pick_channels(raw.info['ch_names'], ['C3', 'Cz', 'C4', 'Af7', 'Fpz', 'Af8'])
+
 
 	# Read epochs (train will be done only between 1 and 2s)
 	# Testing will be done with a running classifier
