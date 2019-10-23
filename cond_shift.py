@@ -58,7 +58,7 @@ matrix_dict['Whitening'] = []
 
 for run in range(n_runs):
 
-	random_samples_idx = np.random.choices(range(f_matrix.shape[-2]), size=n_samples, replace=False)
+	random_samples_idx = np.random.choice(range(f_matrix.shape[-2]), size=n_samples, replace=False)
 	valid_samples_idx = [] 
 
 	for x in range(f_matrix.shape[-2]):	

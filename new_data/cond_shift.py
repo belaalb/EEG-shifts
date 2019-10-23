@@ -8,11 +8,14 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
 from load_data_utils import build_feat_matrix, load_subject_session
+import sys
+sys.path.append('../')
+import utils
 
 
 n_runs = 30
 n_valid_samples = 30
-n_subs = 2 
+n_subs = 9 
 np.random.seed(seed=10)
 
 normalizations = ['None', 'Whitening', 'Baseline 1', 'Baseline 2']
@@ -34,7 +37,7 @@ matrix_dict['Baseline 2'] = []
 for run in range(n_runs):
 
 	feat_train, labels_train, feat_valid, labels_valid = build_feat_matrix(range(1, n_subs+1), 'task', n_valid_samples)
-	
+		
 	for norm in normalizations:
 		print('Starting {} normalization!!'.format(norm))
 
@@ -49,42 +52,41 @@ for run in range(n_runs):
 				sub_feat = scaler.fit_transform(sub_feat)	
 			elif (norm == 'Baseline 1') or (norm == 'Baseline 2'):
 				if norm == 'Baseline 1':
-					bl_data, _ = load_subject_session(s2, 'baseline1')
+					bl_data, _ = load_subject_session(s2+1, 'baseline1')
 				else:
-					bl_data, _ = load_subject_session(s2, 'baseline2')
+					bl_data, _ = load_subject_session(s2+1, 'baseline2')
 		
 				scaler = StandardScaler()
 				scaler.fit(bl_data)
 				sub_feat = scaler.transform(sub_feat)
 
-			model.fit(sub_feat, labels_train)	
+			model.fit(sub_feat, labels_train[s2])	
 
 			for s1 in range(n_subs):
 				equal_label = 0
 				diff_label = 0
 				if s2 == s1:
 					sub1_feat = feat_valid[s1]
-					sub1_label = label_valid[s1]
+					sub1_label = labels_valid[s1]
 				else:
 					sub1_feat = feat_train[s1]
-					sub1_label = label_train[s1]
+					sub1_label = labels_train[s1]
 					
-
 				if norm == 'Whitening':
 					scaler_s1 = StandardScaler()
 					scaler_s1 = scaler.fit(sub1_feat)
 						
 				elif (norm == 'Baseline 1') or (norm == 'Baseline 2'):
 					if norm == 'Baseline 1':
-						bl_data, _ = load_subject_session(s1, 'baseline1')
+						bl_data, _ = load_subject_session(s1+1, 'baseline1')
 					else:
-						bl_data, _ = load_subject_session(s1, 'baseline2')
+						bl_data, _ = load_subject_session(s1+1, 'baseline2')
 
 					scaler_s1 = StandardScaler()
 					scaler_s1.fit(bl_data)
 
 				for sample in range(sub1_feat.shape[0]):
-					data = sub1_data[sample, :]
+					data = sub1_feat[sample, :].reshape(1, -1)
 					if norm != 'None':
 						data = scaler_s1.transform(data)
 					pred = model.predict(data)
