@@ -86,11 +86,13 @@ def build_feat_matrix(subs, session_type, n_valid_samples):
 		total_samples = X.shape[0]
 		
 		train_samples_idx = np.random.choice(range(total_samples), size=total_samples-n_valid_samples, replace=False)
+		print(len(train_samples_idx))
 		valid_samples_idx = [] 
 
 		for idx in range(total_samples):	
 			if idx not in train_samples_idx:
 				valid_samples_idx.append(idx)
+		print(len(valid_samples_idx))		
 		
 		feat_dict_train[sub] = X[train_samples_idx]
 		label_dict_train[sub] = y[train_samples_idx]

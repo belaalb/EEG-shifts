@@ -37,7 +37,7 @@ matrix_dict['Baseline 2'] = []
 
 for run in range(n_runs):
 
-	feat_train, labels_train, feat_valid, labels_valid = build_feat_matrix(range(n_subs), 'task', n_valid_samples)
+	feat_train, feat_valid, labels_train, labels_valid = build_feat_matrix(range(n_subs), 'task', n_valid_samples)
 	
 	for norm in normalizations:
 		print('Starting {} normalization!!'.format(norm))
