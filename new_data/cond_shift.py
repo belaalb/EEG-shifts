@@ -2,6 +2,7 @@ import numpy as np
 from sklearn.metrics.pairwise import euclidean_distances
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
 import pandas as pd 
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -44,7 +45,8 @@ for run in range(n_runs):
 		disparity_matrix = np.zeros([n_subs, n_subs])
 
 		for s2 in range(n_subs):
-			model = KNeighborsClassifier(n_neighbors=5)
+			model = KNeighborsClassifier(n_neighbors=3)
+			#model = RandomForestClassifier(n_estimators = 100)
 			sub_feat = feat_train[s2]
 
 			if norm == 'Whitening':

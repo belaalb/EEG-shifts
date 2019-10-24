@@ -24,36 +24,36 @@ def load_subject_session(sub = 2, session_type = 'task'):
 		event_id_epochs = dict(open_=0)
 		runs = 2		
 
-	raw_fnames = eegbci.load_data(subject, runs)
-	raws = [read_raw_edf(f, preload=True) for f in raw_fnames]
+	raw_fnames = eegbci.load_data(subject, runs, verbose=False)
+	raws = [read_raw_edf(f, preload=True, verbose=False) for f in raw_fnames]
 	raw = concatenate_raws(raws)
 
 	# strip channel names of "." characters
 	raw.rename_channels(lambda x: x.strip('.'))
 
 	# Apply band-pass filter
-	raw.filter(7., 30., fir_design='firwin', skip_by_annotation='edge')
+	raw.filter(0.5, 40., fir_design='firwin', skip_by_annotation='edge', verbose=False)
 
-	events, _ = events_from_annotations(raw, event_id=event_id_annot, chunk_duration=1.)
+	events, _ = events_from_annotations(raw, event_id=event_id_annot, chunk_duration=1., verbose=False)
 
 	#print(np.round((events[:, 0] - raw.first_samp) / raw.info['sfreq'], 3))
 
 
 	picks = pick_types(raw.info, meg=False, eeg=True, stim=False, eog=False,
 		             exclude='bads')
-	picks = mne.pick_channels(raw.info['ch_names'], ['C3', 'Cz', 'C4', 'Af7', 'Fpz', 'Af8'])
+	#picks = mne.pick_channels(raw.info['ch_names'], ['C5', 'C3', 'Cz', 'C4', 'C6', 'T9', 'T10', 'Af7', 'Fpz', 'Af8', 'F5', 'F3', 'Fz', 'F4', 'F6'])
 
 
 	# Read epochs (train will be done only between 1 and 2s)
 	# Testing will be done with a running classifier
 	epochs = Epochs(raw, events, event_id_epochs, tmin, tmax, proj=True, picks=picks,
-		          baseline=None, preload=True)
+		          baseline=None, preload=True, verbose=False)
 	#epochs_train = epochs.copy().crop(tmin=1., tmax=2.)
 	labels = epochs.events[:, -1] - 2
 
 	#epochs_data = epochs_train.get_data()
 
-	psds, freqs = mne.time_frequency.psd_welch(epochs, fmin=0.5, fmax=30.)
+	psds, freqs = mne.time_frequency.psd_welch(epochs, fmin=0.5, fmax=30., verbose=False)
 
 	# Normalize the PSDs
 	psds /= np.sum(psds, axis=-1, keepdims=True)
