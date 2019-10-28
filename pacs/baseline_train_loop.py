@@ -9,7 +9,7 @@ import torchvision
 
 class TrainLoop(object):
 
-	def __init__(self, model, optimizer, source_loader, test_source_loader, target_loader, nadir_slack, patience, checkpoint_path=None, checkpoint_epoch=None, cuda=True):
+	def __init__(self, model, optimizer, source_loader, test_source_loader, nadir_slack, patience, checkpoint_path=None, checkpoint_epoch=None, cuda=True):
 		if checkpoint_path is None:
 			# Save to current directory
 			self.checkpoint_path = os.getcwd()
@@ -18,7 +18,7 @@ class TrainLoop(object):
 			if not os.path.isdir(self.checkpoint_path):
 				os.mkdir(self.checkpoint_path)
 
-		self.save_epoch_fmt = os.path.join(self.checkpoint_path, 'baseline' + '_{}ep.pt')
+		self.save_epoch_fmt = os.path.join(self.checkpoint_path, '{}ep.pt')
 
 		self.cuda_mode = cuda
 		self.model = model
@@ -28,7 +28,6 @@ class TrainLoop(object):
 		#self.scheduler_added = torch.optim.lr_scheduler.StepLR(self.optimizer_added, step_size=patience, gamma=0.1)
 		self.source_loader = source_loader
 		self.test_source_loader = test_source_loader
-		self.target_loader = target_loader
 		self.device = next(self.model.parameters()).device
 		self.history = {'loss': [], 'accuracy_source':[], 'accuracy_target':[]}
 		self.cur_epoch = 0
@@ -60,13 +59,12 @@ class TrainLoop(object):
 			print('Current LR: {}'.format(self.optimizer.state_dict()['param_groups'][0]['lr']))
 
 			self.history['accuracy_source'].append(test(self.test_source_loader, self.model, self.device, source_target = 'source'))
-			self.history['accuracy_target'].append(test(self.target_loader, self.model, self.device, source_target = 'target'))
 
 			print('Valid. on SOURCE data - Current acc., best acc., and epoch: {:0.4f}, {:0.4f}, {}'.format(self.history['accuracy_source'][-1], np.max(self.history['accuracy_source']), 1+np.argmax(self.history['accuracy_source'])))
-			print('Valid. on TARGET data - Current acc., best acc., and epoch: {:0.4f}, {:0.4f}, {}'.format(self.history['accuracy_target'][-1], np.max(self.history['accuracy_target']), 1+np.argmax(self.history['accuracy_target'])))
+
 
 			#if self.cur_epoch % save_every == 0 or self.history['accuracy_source'][-1] > np.max([-np.inf]+self.history['accuracy_source'][:-1]) or self.history['accuracy_target'][-1] > np.max([-np.inf]+self.history['accuracy_target'][:-1]):
-			if self.cur_epoch % save_every == 0 or self.history['accuracy_target'][-1] > np.max([-np.inf]+self.history['accuracy_target'][:-1]):
+			if self.cur_epoch % save_every == 0 or self.history['accuracy_source'][-1] > np.max([-np.inf]+self.history['accuracy_source'][:-1]):
 
 				self.checkpointing()
 

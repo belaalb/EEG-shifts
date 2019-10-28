@@ -70,17 +70,14 @@ for run in range(args.n_runs):
 	img_transform_test = transforms.Compose([transforms.Resize((225, 225)), transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])])
 
 	train_source_1 = args.data_path + 'train_' + args.source1 + '.hdf'
-	train_source_2 = args.data_path + 'train_' + args.source2 + '.hdf'
-	train_source_3 = args.data_path + 'train_' + args.source3 + '.hdf'
 	test_source_1 = args.data_path + 'test_' + args.source1 + '.hdf'
-	test_source_2 = args.data_path + 'test_' + args.source2 + '.hdf'
-	test_source_3 = args.data_path + 'test_' + args.source3 + '.hdf'
-	target_path = args.data_path + 'test_' + args.target + '.hdf'
 
-	source_dataset = Loader_validation(hdf_path1=train_source_1, transform=img_transform_train)
+
+
+	source_dataset = Loader_validation(hdf_path=train_source_1, transform=img_transform_train)
 	source_loader = torch.utils.data.DataLoader(dataset=source_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
 
-	test_source_dataset = Loader_validation(hdf_path1=test_source_1, transform=img_transform_test)
+	test_source_dataset = Loader_validation(hdf_path=test_source_1, transform=img_transform_test)
 	test_source_loader = torch.utils.data.DataLoader(dataset=test_source_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
 
 	model = models.AlexNet(num_classes = 7, baseline = True)
@@ -97,7 +94,7 @@ for run in range(args.n_runs):
 
 	torch.backends.cudnn.benchmark=True
 		
-	trainer = TrainLoop(model, optimizer, source_loader, test_source_loader, target_loader, args.nadir_slack, args.patience, checkpoint_path=args.checkpoint_path, checkpoint_epoch=args.checkpoint_epoch, cuda=args.cuda)
+	trainer = TrainLoop(model, optimizer, source_loader, test_source_loader, args.nadir_slack, args.patience, checkpoint_path=args.checkpoint_path, checkpoint_epoch=args.checkpoint_epoch, cuda=args.cuda)
 		
 	err = trainer.train(n_epochs=args.epochs, save_every=args.save_every)
 	acc_runs.append(1-err)
