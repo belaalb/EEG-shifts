@@ -82,7 +82,7 @@ for run in range(args.n_runs):
 
 	model = models.AlexNet(num_classes = 7, baseline = True)
 	#alexnet = models_tv.alexnet(pretrained = True)
-	state_dict = torch.load(args.model_path+'/alexnet_caffe.pth.tar')
+	state_dict = torch.load(args.model_path+'alexnet_caffe.pth.tar')
 	del state_dict["classifier.fc8.weight"]
 	del state_dict["classifier.fc8.bias"]
 	not_loaded = model.load_state_dict(state_dict, strict = False)

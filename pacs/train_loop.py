@@ -62,8 +62,6 @@ class TrainLoop(object):
 
 			print('Valid. on SOURCE data - Current acc., best acc., and epoch: {:0.4f}, {:0.4f}, {}'.format(self.history['accuracy_source'][-1], np.max(self.history['accuracy_source']), 1+np.argmax(self.history['accuracy_source'])))
 
-
-			#if self.cur_epoch % save_every == 0 or self.history['accuracy_source'][-1] > np.max([-np.inf]+self.history['accuracy_source'][:-1]) or self.history['accuracy_target'][-1] > np.max([-np.inf]+self.history['accuracy_target'][:-1]):
 			if self.cur_epoch % save_every == 0 or self.history['accuracy_source'][-1] > np.max([-np.inf]+self.history['accuracy_source'][:-1]):
 
 				self.checkpointing()
