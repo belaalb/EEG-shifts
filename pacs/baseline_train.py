@@ -26,6 +26,7 @@ parser.add_argument('--l2', type=float, default=0.00005, metavar='m', help='L2 w
 parser.add_argument('--checkpoint-epoch', type=int, default=None, metavar='N', help='epoch to load for checkpointing. If None, training starts from scratch')
 parser.add_argument('--checkpoint-path', type=str, default=None, metavar='Path', help='Path for checkpointing')
 parser.add_argument('--data-path', type=str, default='./prepared_data/', metavar='Path', help='Data path')
+parser.add_argument('--model-path', type=str, default='./', metavar='Path', help='Data path')
 parser.add_argument('--source1', type=str, default='photo', metavar='Path', help='Path to source1 file')
 parser.add_argument('--source2', type=str, default='cartoon', metavar='Path', help='Path to source2 file')
 parser.add_argument('--source3', type=str, default='sketch', metavar='Path', help='Path to source3 file')
@@ -84,7 +85,7 @@ for run in range(args.n_runs):
 
 	model = models.AlexNet(num_classes = 7, baseline = True)
 	#alexnet = models_tv.alexnet(pretrained = True)
-	state_dict = torch.load("./alexnet_caffe.pth.tar")
+	state_dict = torch.load(args.model_path+'/alexnet_caffe.pth.tar')
 	del state_dict["classifier.fc8.weight"]
 	del state_dict["classifier.fc8.bias"]
 	not_loaded = model.load_state_dict(state_dict, strict = False)
