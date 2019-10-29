@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 from tqdm import tqdm
-from baseline_test import test
+from test import test
 import torchvision
 
 
@@ -75,7 +75,7 @@ class TrainLoop(object):
 		print('Saving final model...')
 		self.checkpointing()
 
-		return 1. - np.max(self.history['accuracy_target'])
+		return 1. - np.max(self.history['accuracy_source'])
 
 	def train_step(self, batch):
 		self.model.train()
