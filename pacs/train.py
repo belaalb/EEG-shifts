@@ -11,7 +11,7 @@ import PIL
 import pandas
 
 import models as models
-from baseline_train_loop import TrainLoop
+from train_loop import TrainLoop
 from data_loader import Loader_source, Loader_validation, Loader_unif_sampling
 import torchvision.models as models_tv
 import utils	
@@ -72,8 +72,6 @@ for run in range(args.n_runs):
 	train_source_1 = args.data_path + 'train_' + args.source1 + '.hdf'
 	test_source_1 = args.data_path + 'test_' + args.source1 + '.hdf'
 
-
-
 	source_dataset = Loader_validation(hdf_path=train_source_1, transform=img_transform_train)
 	source_loader = torch.utils.data.DataLoader(dataset=source_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
 
@@ -100,5 +98,5 @@ for run in range(args.n_runs):
 	acc_runs.append(1-err)
 
 print(acc_runs)
-df = pandas.DataFrame(data={'Acc-{}'.format(args.target): acc_runs, 'Seed': seeds[:args.n_runs]})
-df.to_csv('./baseline_accuracy_runs_'+args.target+'.csv', sep=',', index = False)
+df = pandas.DataFrame(data={'Acc-{}'.format(args.source1): acc_runs, 'Seed': seeds[:args.n_runs]})
+df.to_csv('./baseline_accuracy_runs_'+args.source1+'.csv', sep=',', index = False)
