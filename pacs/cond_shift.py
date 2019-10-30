@@ -10,7 +10,8 @@ import torch.nn.functional as F
 from tqdm import tqdm
 from data_loader import Loader_validation
 import models as models
-
+import seaborn as sns
+from matplotlib.ticker import FuncFormatter
 
 import sys
 sys.path.append('../')
