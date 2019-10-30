@@ -1,4 +1,6 @@
+import numpy as np
 import os
+import glob
 import torch
 import torch.utils.data
 from torchvision import datasets
@@ -9,41 +11,35 @@ from tqdm import tqdm
 from data_loader import Loader_validation
 import models as models
 
+
 import sys
 sys.path.append('../')
 import utils
 
 class OffTest(object):
 
-	def __init__(self, checkpoint, loader, cuda):
+	def __init__(self, checkpoint, cuda):
 
 		self.cp_task = checkpoint
-		self.dataloader = loader
 		self.cuda = cuda
-		self.feature_extractor = models.AlexNet(num_classes = 7, baseline = False)
-		self.task_classifier = models.task_classifier()
+		self.model = models.AlexNet(num_classes = 7, baseline = True)
 
 	def load_checkpoint(self, epoch=None):
 		self.cp_task = self.cp_task.format(epoch) if epoch else self.cp_task
 		
 		if os.path.isfile(self.cp_task):
 			ckpt = torch.load(self.cp_task)
-			not_loaded = self.feature_extractor.load_state_dict(ckpt['feature_extractor_state'])
-			not_loaded = self.task_classifier.load_state_dict(ckpt['task_classifier_state'])
+			not_loaded = self.model.load_state_dict(ckpt['model_state'])
 		else:
 			print('No checkpoint found at: {}'.format(self.cp_task))
 
 
-	def test(self):
-
-		feature_extractor = self.feature_extractor.eval()
-		task_classifier = self.task_classifier.eval()
-		
+	def test(self, loader):
+		self.dataloader = loader
+		model = self.model.eval()
 		with torch.no_grad():
-
 			if self.cuda:
-				self.feature_extractor = self.feature_extractor.cuda()
-				self.task_classifier = self.task_classifier.cuda()
+				self.feature_extractor = self.model.cuda()
 
 			target_iter = tqdm(enumerate(self.dataloader))
 
@@ -57,8 +53,7 @@ class OffTest(object):
 					x = x.cuda()
 					y = y.cuda()
 				
-				features = self.feature_extractor.forward(x)
-				task_out = self.task_classifier.forward(features)
+				task_out = model.forward(x)
 				class_output = F.softmax(task_out, dim=1)
 				pred_task = class_output.data.max(1, keepdim=True)[1]
 				n_correct += pred_task.eq(y.data.view_as(pred_task)).cpu().sum()
@@ -78,41 +73,43 @@ if __name__ == '__main__':
 	results_dict['Alexnet'] = []
 	matrix_dict = {}
 	matrix_dict['Alexnet'] = []
-	models = ['Alexnet']
+	models_list = ['Alexnet']
 
 	for domain in domains:
-		data_path =  './prepared_data/test_'+ domain +'.hdf'
+		data_path =  '/home/user/RP-domain-adap/pacs/prepared_data/test_'+ domain +'.hdf'
 		dataset = Loader_validation(hdf_path=data_path, transform=img_transform)
 		loaders_dict[domain] = torch.utils.data.DataLoader(dataset=dataset, batch_size=64, shuffle=True, num_workers=4)
 
-	for model in models:
+	for model in models_list:
 		cp_path = './'+model
 		disparity_matrix = np.zeros([len(domains), len(domains)])
 
-		for d1, domain in enumerate(domains):
-			cp_name = os.glob(os.join(cp_path+domain)+'*.pt')
-			test_object = OffTest(cp_path, cp_name, loader, cuda)
+		for d1, domain1 in enumerate(domains):
+			cp_name = glob.glob(os.path.join(cp_path,domain1)+'/*.pt')
+			print(cp_name[0])
+			test_object = OffTest(cp_name[0], cuda)
 			test_object.load_checkpoint()
-			for d2, domain in enumerate(domains):
-				acc = test_object.test()
+			for d2, domain2 in enumerate(domains):
+				print('Domain 1', domain1)
+				print('Domain 2', domain2)
+				acc = test_object.test(loaders_dict[domain2])
+				print('Accuracy:', acc)
 			disparity_matrix[d1, d2] = 1-acc	
 				
 			for d1 in range(len(domains)):
 				for d2 in range(len(domains)):
 					disparity_matrix[d1, d2] = min(min(disparity_matrix[d1, d2], 1-disparity_matrix[d1, d2]), min(disparity_matrix[d2, d1], 1-disparity_matrix[d2, d1]))
 					disparity_matrix[d2, d1] = disparity_matrix[d1, d2] 
-			
-			matrix_dict[model].append(disparity_matrix)
 
-			cond_shift = utils.disparity_normalized_frob_norm(disparity_matrix)
-			results_dict[model].append(cond_shift)
-			print('Norm of disparity matrix:', cond_shift)
+		cond_shift = utils.disparity_normalized_frob_norm(disparity_matrix)
+		results_dict[model].append(cond_shift)
+		print('Norm of disparity matrix:', cond_shift)
 
-			if len(matrix_dict[model]) <= 1:
-				fmt = lambda x, pos: '{:.3f}'.format(x)
-				disparity_hmap = sns.heatmap(disparity_matrix, annot=True, fmt='.3f', cmap="RdPu", cbar_kws={'format': FuncFormatter(fmt)})
-				plt.savefig('disparity_hmap_pink.png')
-				plt.show()
+		if len(matrix_dict[model]) <= 1:
+			fmt = lambda x, pos: '{:.3f}'.format(x)
+			disparity_hmap = sns.heatmap(disparity_matrix, annot=True, fmt='.3f', cmap="RdPu", cbar_kws={'format': FuncFormatter(fmt)})
+			plt.savefig('disparity_hmap_pink.png')
+			plt.show()
 
 	pd.DataFrame.from_dict(results_dict).to_csv('./Results/all_normalizations_condshift.csv', index=False)
 

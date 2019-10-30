@@ -14,8 +14,6 @@ import models as models
 from train_loop import TrainLoop
 from data_loader import Loader_source, Loader_validation, Loader_unif_sampling
 import torchvision.models as models_tv
-import utils	
-
 
 parser = argparse.ArgumentParser(description='PACS baseline')
 parser.add_argument('--batch-size', type=int, default=64, metavar='N', help='input batch size for training (default: 64)')
@@ -79,7 +77,6 @@ for run in range(args.n_runs):
 	test_source_loader = torch.utils.data.DataLoader(dataset=test_source_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.workers)
 
 	model = models.AlexNet(num_classes = 7, baseline = True)
-	#alexnet = models_tv.alexnet(pretrained = True)
 	state_dict = torch.load(args.model_path+'alexnet_caffe.pth.tar')
 	del state_dict["classifier.fc8.weight"]
 	del state_dict["classifier.fc8.bias"]

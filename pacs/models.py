@@ -170,42 +170,6 @@ class AlexNet(nn.Module):
 		
 		self.num_classes = num_classes
 		self.baseline = baseline
-		'''
-		self.features = nn.Sequential(
-			nn.Conv2d(3, 96, kernel_size=11, stride=4),
-			nn.ReLU(inplace=True),
-			nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True),
-			nn.LocalResponseNorm(5, 1e-4, 0.75),
-			nn.Conv2d(96, 256, kernel_size=5, padding=2, groups=2),
-			nn.ReLU(inplace=True),
-			nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True),
-			nn.LocalResponseNorm(5, 1e-4, 0.75),
-			nn.Conv2d(256, 384, kernel_size=3, padding=1),
-			nn.ReLU(inplace=True),
-			nn.Conv2d(384, 384, kernel_size=3, padding=1, groups=2),
-			nn.ReLU(inplace=True),
-			nn.Conv2d(384, 256, kernel_size=3, padding=1, groups=2),
-			nn.ReLU(inplace=True),
-			nn.MaxPool2d(kernel_size=3, stride=2, ceil_mode=True),
-		)
-
-		self.classifier = nn.Sequential(
-			#nn.Dropout(),
-			nn.Linear(256 * 6 * 6, 4096),
-			nn.ReLU(inplace=True),
-			nn.Dropout(),
-			nn.Linear(4096, 4096),
-			nn.ReLU(inplace=True),			
-			nn.Dropout(),
-			nn.Linear(4096, self.num_classes),
-		)
-
-		#self.classifier_added = nn.Sequential(
-			#nn.ReLU(),
-		#	nn.Dropout(),
-		#	nn.Linear(4096, self.num_classes),
-		#)
-		'''
 		self.features = nn.Sequential(OrderedDict([
 			("conv1", nn.Conv2d(3, 96, kernel_size=11, stride=4)),
 			("relu1", nn.ReLU(inplace=True)),
@@ -247,16 +211,10 @@ class AlexNet(nn.Module):
 		
 	def initialize_params(self):
 
-		for layer in self.modules():
-			#if isinstance(layer, torch.nn.Conv2d):
-				#init.kaiming_normal_(layer.weight, a=0, mode='fan_out')
-				#layer.bias.data.zero_()	
+		for layer in self.modules():	
 			if isinstance(layer, torch.nn.Linear):
 				init.xavier_uniform_(layer.weight, 0.1)
 				layer.bias.data.zero_()	
-			#elif isinstance(layer, torch.nn.BatchNorm2d) or isinstance(layer, torch.nn.BatchNorm1d):
-				#layer.weight.data.fill_(1)
-				#layer.bias.data.zero_()	
 
 	def forward(self, x):
 		x = self.features(x*57.6)

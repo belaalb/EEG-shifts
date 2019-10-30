@@ -81,15 +81,8 @@ class TrainLoop(object):
 		self.model.train()
 		
 		x_1, y_task_1, _ = batch
-
-		#writer = SummaryWriter()
-		#grid = torchvision.utils.make_grid(x[:, 0, :, :, :].squeeze())
-		#writer.add_image('images', grid, 0)
-		#writer.add_graph(self.model, x)
-		#writer.close()
-
-		x = x_1 #torch.cat((x_1, x_2, x_3), dim=0)
-		y_task = y_task_1 #torch.cat((y_task_1, y_task_2, y_task_3), dim=0)
+		x = x_1 	
+		y_task = y_task_1
 
 		if self.cuda_mode:
 			x = x.cuda()
@@ -99,13 +92,8 @@ class TrainLoop(object):
 		loss = torch.nn.CrossEntropyLoss()(out, y_task)
 		
 		self.optimizer.zero_grad()
-		#self.optimizer_added.zero_grad()
 		loss.backward()
 		self.optimizer.step()
-		#self.optimizer_added.step()
-
-		#for mod in self.model.modules():
-		#	self.print_grad_norms(mod)
 			
 		return loss.item()
 
